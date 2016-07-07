@@ -2,6 +2,7 @@ package br.com.memorify.sunshine;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -67,14 +68,21 @@ public class MainActivity extends AppCompatActivity {
             case R.id.refresh_action:
                 fetchWeather();
                 return true;
+            case R.id.settings_action:
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
     private void fetchWeather() {
-        final String MOUNTAIN_VIEW_LOCATION_QUERY = "94043";
-        new FetchWeatherTask(MOUNTAIN_VIEW_LOCATION_QUERY, new FetchWeatherTask.FetchWeatherCallbacks() {
+        final String PREF_LOCATION_KEY = getString(R.string.pref_location_key);
+        final String PREF_LOCATION_DEFAULT = getString(R.string.pref_location_default_value);
+        final String LOCATION_QUERY = PreferenceManager
+                .getDefaultSharedPreferences(getBaseContext()).getString(PREF_LOCATION_KEY, PREF_LOCATION_DEFAULT);
+
+        new FetchWeatherTask(LOCATION_QUERY, new FetchWeatherTask.FetchWeatherCallbacks() {
             @Override
             public void onSuccess(String[] weatherForecasts) {
                 weekForecast = Arrays.asList(weatherForecasts);
