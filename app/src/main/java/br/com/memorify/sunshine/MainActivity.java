@@ -1,10 +1,13 @@
 package br.com.memorify.sunshine;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -41,6 +44,14 @@ public class MainActivity extends AppCompatActivity {
 
         ListView forecastListView = (ListView) findViewById(R.id.listview_forecast);
         forecastListView.setAdapter(forecastAdapter);
+        forecastListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+                intent.putExtra(Intent.EXTRA_TEXT, forecastAdapter.getItem(position));
+                MainActivity.this.startActivity(intent);
+            }
+        });
     }
 
     @Override

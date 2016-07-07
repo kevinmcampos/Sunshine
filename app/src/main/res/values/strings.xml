@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Sunshine</string>\
+    <string name="details">Details</string>
 
     <string name="refresh_action">Refresh</string>
 </resources>
