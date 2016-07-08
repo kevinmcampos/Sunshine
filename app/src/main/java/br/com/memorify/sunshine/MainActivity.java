@@ -27,20 +27,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        String[] dummyData = { "Mon 6/23 - Sunny - 31/17",
-                "Tue 6/24 - Foggy - 21/8",
-                "Wed 6/25 - Cloudy - 22/17",
-                "Thurs 6/26 - Rainy - 18/11",
-                "Fri 6/27 - Foggy - 21/10",
-                "Sat 6/28 - TRAPPED IN WEATHERSTATION - 23/18",
-                "Sun 6/29 - Sunny - 20/7" };
-        weekForecast = new ArrayList<>(Arrays.asList(dummyData));
-
         forecastAdapter = new ArrayAdapter<>(
                 getBaseContext(), // The current context (this activity)
                 R.layout.list_item_forecast, // The name of the layout ID.
                 R.id.list_item_forecast_textview, // The ID of the textview to populate.
-                weekForecast);
+                new ArrayList<String>());
         forecastAdapter.setNotifyOnChange(false);
 
         ListView forecastListView = (ListView) findViewById(R.id.listview_forecast);
@@ -53,6 +44,12 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.this.startActivity(intent);
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        fetchWeather();
     }
 
     @Override
