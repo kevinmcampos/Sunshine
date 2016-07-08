@@ -6,6 +6,10 @@
         android:title="@string/refresh_action"
         app:showAsAction="never" />
     <item
+        android:id="@+id/location_on_map_action"
+        android:title="@string/map_location"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/settings_action"
         android:title="@string/settings"
         app:showAsAction="never" />

@@ -1,6 +1,7 @@
 package br.com.memorify.sunshine;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -65,6 +66,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.refresh_action:
                 fetchWeather();
                 return true;
+            case R.id.location_on_map_action:
+                showLocationOnMap();
+                return true;
             case R.id.settings_action:
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
@@ -96,5 +100,23 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getBaseContext(), "Failed to fetch weather data.", Toast.LENGTH_SHORT).show();
             }
         }).execute();
+    }
+
+    private void showLocationOnMap() {
+        final String PREF_LOCATION_KEY = getString(R.string.pref_location_key);
+        final String PREF_LOCATION_DEFAULT = getString(R.string.pref_location_default_value);
+        final String LOCATION_QUERY = PreferenceManager
+                .getDefaultSharedPreferences(getBaseContext()).getString(PREF_LOCATION_KEY, PREF_LOCATION_DEFAULT);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        Uri geoLocation = Uri.parse("geo:0,0").buildUpon()
+                .appendQueryParameter("q", LOCATION_QUERY).build();
+        intent.setData(geoLocation);
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        } else {
+            Toast.makeText(getBaseContext(), "There is no app to show location on map", Toast.LENGTH_SHORT).show();
+        }
     }
 }

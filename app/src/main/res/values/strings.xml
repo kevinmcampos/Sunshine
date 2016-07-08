@@ -1,6 +1,7 @@
 <resources>
-    <string name="app_name">Sunshine</string>\
+    <string name="app_name">Sunshine</string>
     <string name="details">Details</string>
+    <string name="map_location">Map Location</string>
     <string name="settings">Settings</string>
 
     <string name="refresh_action">Refresh</string>
