@@ -1,7 +1,9 @@
 package br.com.memorify.sunshine;
 
+import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.text.format.Time;
 
@@ -22,16 +24,18 @@ public class FetchWeatherTask extends AsyncTask<Void, Void, String[]> {
     private static final String TAG = "FetchWeatherTask";
     private final String QUERY;
     private FetchWeatherCallbacks callbacks;
+    private Context context;
 
     public interface FetchWeatherCallbacks {
         void onSuccess(String[] weatherForecasts);
         void onFailed();
     }
 
-    public FetchWeatherTask(@NonNull final String QUERY, FetchWeatherCallbacks callbacks) {
+    public FetchWeatherTask(Context context, @NonNull final String QUERY, FetchWeatherCallbacks callbacks) {
         if (QUERY.isEmpty()) {
             throw new IllegalArgumentException("Query should not be empty");
         }
+        this.context = context;
         this.QUERY = QUERY;
         this.callbacks = callbacks;
     }
@@ -160,6 +164,17 @@ public class FetchWeatherTask extends AsyncTask<Void, Void, String[]> {
         dayTime = new Time();
 
         String[] resultStrs = new String[numDays];
+
+        // Data is fetched in Celsius by default.
+        // If user prefers to see in Fahrenheit, convert the values here.
+        // We do this rather than fetching in Fahrenheit so that the user can
+        // change this option without us having to re-fetch the data once
+        // we start storing the values in a database.
+        final String PREF_UNITS_KEY = context.getString(R.string.pref_units_key);
+        final String PREF_UNITS_DEFAULT = context.getString(R.string.pref_units_default_value);
+        final String UNIT_TYPE = PreferenceManager
+                .getDefaultSharedPreferences(context).getString(PREF_UNITS_KEY, PREF_UNITS_DEFAULT);
+
         for(int i = 0; i < weatherArray.length(); i++) {
             // For now, using the format "Day, description, hi/low"
             String day;
@@ -187,7 +202,7 @@ public class FetchWeatherTask extends AsyncTask<Void, Void, String[]> {
             double high = temperatureObject.getDouble(OWM_MAX);
             double low = temperatureObject.getDouble(OWM_MIN);
 
-            highAndLow = formatHighLows(high, low);
+            highAndLow = formatHighLows(high, low, UNIT_TYPE);
             resultStrs[i] = day + " - " + description + " - " + highAndLow;
         }
 
@@ -207,7 +222,13 @@ public class FetchWeatherTask extends AsyncTask<Void, Void, String[]> {
     /**
      * Prepare the weather high/lows for presentation.
      */
-    private String formatHighLows(double high, double low) {
+    private String formatHighLows(double high, double low, String unitType) {
+
+        if (unitType.equals(context.getString(R.string.pref_units_imperial_value))) {
+            high = high * 1.8 + 32;
+            low = low * 1.8 + 32;
+        }
+
         // For presentation, assume the user doesn't care about tenths of a degree.
         long roundedHigh = Math.round(high);
         long roundedLow = Math.round(low);

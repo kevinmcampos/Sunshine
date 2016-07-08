@@ -5,7 +5,19 @@
 
     <string name="refresh_action">Refresh</string>
 
+    <!-- Preferences -->
     <string name="pref_location_label">Location</string>
     <string name="pref_location_key" translatable="false">location</string>
     <string name="pref_location_default_value" translatable="false">94043</string>
+
+    <string name="pref_units_label">Units</string>
+    <string name="pref_units_key" translatable="false">units</string>
+
+    <string name="pref_units_metric_label">Metric</string>
+    <string name="pref_units_metric_value" translatable="false">units</string>
+
+    <string name="pref_units_imperial_label">units</string>
+    <string name="pref_units_imperial_value" translatable="false">units</string>
+
+    <string name="pref_units_default_value">@string/pref_units_metric_value</string>
 </resources>

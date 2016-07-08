@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
         final String LOCATION_QUERY = PreferenceManager
                 .getDefaultSharedPreferences(getBaseContext()).getString(PREF_LOCATION_KEY, PREF_LOCATION_DEFAULT);
 
-        new FetchWeatherTask(LOCATION_QUERY, new FetchWeatherTask.FetchWeatherCallbacks() {
+        new FetchWeatherTask(getBaseContext(), LOCATION_QUERY, new FetchWeatherTask.FetchWeatherCallbacks() {
             @Override
             public void onSuccess(String[] weatherForecasts) {
                 weekForecast = Arrays.asList(weatherForecasts);
