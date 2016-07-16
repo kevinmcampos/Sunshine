@@ -31,6 +31,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-    </application>
 
+        <provider
+            android:name=".data.WeatherProvider"
+            android:authorities="br.com.memorify.sunshine" />
+    </application>
 </manifest>
