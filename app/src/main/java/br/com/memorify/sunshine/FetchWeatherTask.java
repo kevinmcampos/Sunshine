@@ -15,9 +15,11 @@
  */
 package br.com.memorify.sunshine;
 
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
@@ -39,6 +41,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Vector;
 
+import br.com.memorify.sunshine.data.WeatherContract.LocationEntry;
 import br.com.memorify.sunshine.data.WeatherContract.WeatherEntry;
 
 public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
@@ -109,7 +112,30 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         // Students: First, check if the location with this city name exists in the db
         // If it exists, return the current ID
         // Otherwise, insert it using the content resolver and the base URI
-        return -1;
+        Cursor locationCursor = mContext.getContentResolver().query(
+                LocationEntry.CONTENT_URI,
+                new String[]{LocationEntry._ID},
+                LocationEntry.COLUMN_LOCATION_SETTING + " = ?",
+                new String[]{locationSetting},
+                null);
+
+        long locationId;
+        if (locationCursor.moveToFirst()) {
+            locationId = locationCursor.getLong(locationCursor.getColumnIndex(LocationEntry._ID));
+        } else {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(LocationEntry.COLUMN_CITY_NAME, cityName);
+            contentValues.put(LocationEntry.COLUMN_LOCATION_SETTING, locationSetting);
+            contentValues.put(LocationEntry.COLUMN_COORD_LAT, lat);
+            contentValues.put(LocationEntry.COLUMN_COORD_LONG, lon);
+
+            Uri insert = mContext.getContentResolver().insert(
+                        LocationEntry.CONTENT_URI,
+                        contentValues);
+            locationId = ContentUris.parseId(insert);
+        }
+        locationCursor.close();
+        return locationId;
     }
 
     /*
