@@ -15,7 +15,6 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -78,28 +77,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fetchWeather() {
-        final String PREF_LOCATION_KEY = getString(R.string.pref_location_key);
-        final String PREF_LOCATION_DEFAULT = getString(R.string.pref_location_default_value);
-        final String LOCATION_QUERY = PreferenceManager
-                .getDefaultSharedPreferences(getBaseContext()).getString(PREF_LOCATION_KEY, PREF_LOCATION_DEFAULT);
-
-        new FetchWeatherTask(getBaseContext(), LOCATION_QUERY, new FetchWeatherTask.FetchWeatherCallbacks() {
-            @Override
-            public void onSuccess(String[] weatherForecasts) {
-                weekForecast = Arrays.asList(weatherForecasts);
-
-                forecastAdapter.clear();
-                for (String weekString : weekForecast) {
-                    forecastAdapter.add(weekString);
-                }
-                forecastAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onFailed() {
-                Toast.makeText(getBaseContext(), "Failed to fetch weather data.", Toast.LENGTH_SHORT).show();
-            }
-        }).execute();
+        new FetchWeatherTask(getBaseContext(), forecastAdapter).execute();
     }
 
     private void showLocationOnMap() {
