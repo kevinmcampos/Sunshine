@@ -1,6 +1,7 @@
 package br.com.memorify.sunshine;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -8,42 +9,34 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.List;
+import br.com.memorify.sunshine.data.WeatherContract;
 
 public class MainActivity extends AppCompatActivity {
 
-    private List<String> weekForecast;
-    private ArrayAdapter<String> forecastAdapter;
+    private ForecastAdapter forecastAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        forecastAdapter = new ArrayAdapter<>(
-                getBaseContext(), // The current context (this activity)
-                R.layout.list_item_forecast, // The name of the layout ID.
-                R.id.list_item_forecast_textview, // The ID of the textview to populate.
-                new ArrayList<String>());
-        forecastAdapter.setNotifyOnChange(false);
+        String locationSetting = Utility.getPreferredLocation(getBaseContext());
+
+        // Sort order:  Ascending, by date.
+        String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
+        Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(
+                locationSetting, System.currentTimeMillis());
+
+        Cursor cur = getContentResolver().query(weatherForLocationUri,
+                null, null, null, sortOrder);
+
+        forecastAdapter = new ForecastAdapter(getBaseContext(), cur, 0);
 
         ListView forecastListView = (ListView) findViewById(R.id.listview_forecast);
         forecastListView.setAdapter(forecastAdapter);
-        forecastListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(MainActivity.this, DetailActivity.class);
-                intent.putExtra(Intent.EXTRA_TEXT, forecastAdapter.getItem(position));
-                MainActivity.this.startActivity(intent);
-            }
-        });
     }
 
     @Override
@@ -77,7 +70,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fetchWeather() {
-        new FetchWeatherTask(getBaseContext(), forecastAdapter).execute();
+        FetchWeatherTask weatherTask = new FetchWeatherTask(getBaseContext());
+
+        String location = Utility.getPreferredLocation(getBaseContext());
+        weatherTask.execute(location);
     }
 
     private void showLocationOnMap() {
