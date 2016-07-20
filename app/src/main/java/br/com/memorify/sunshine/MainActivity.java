@@ -5,6 +5,9 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,8 +17,9 @@ import android.widget.Toast;
 
 import br.com.memorify.sunshine.data.WeatherContract;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    private final int FORECAST_LOADER_ID = 0;
     private ForecastAdapter forecastAdapter;
 
     @Override
@@ -23,17 +27,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        String locationSetting = Utility.getPreferredLocation(getBaseContext());
+        getSupportLoaderManager().initLoader(FORECAST_LOADER_ID, null, this);
 
-        // Sort order:  Ascending, by date.
-        String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
-        Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(
-                locationSetting, System.currentTimeMillis());
-
-        Cursor cur = getContentResolver().query(weatherForLocationUri,
-                null, null, null, sortOrder);
-
-        forecastAdapter = new ForecastAdapter(getBaseContext(), cur, 0);
+        forecastAdapter = new ForecastAdapter(getBaseContext(), null, 0);
 
         ListView forecastListView = (ListView) findViewById(R.id.listview_forecast);
         forecastListView.setAdapter(forecastAdapter);
@@ -92,5 +88,31 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Toast.makeText(getBaseContext(), "There is no app to show location on map", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String locationSetting = Utility.getPreferredLocation(getBaseContext());
+
+        String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
+        Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(
+                locationSetting, System.currentTimeMillis());
+
+        return new CursorLoader(getBaseContext(),
+                weatherForLocationUri,
+                null,
+                null,
+                null,
+                sortOrder);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        forecastAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        forecastAdapter.swapCursor(null);
     }
 }
