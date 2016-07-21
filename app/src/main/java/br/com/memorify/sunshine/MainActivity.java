@@ -22,7 +22,9 @@ import br.com.memorify.sunshine.data.WeatherContract;
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private final int FORECAST_LOADER_ID = 0;
+
     private ForecastAdapter forecastAdapter;
+    private String lastLocation;
 
     private static final String[] FORECAST_COLUMNS = {
             // In this case the id needs to be fully qualified with a table name, since
@@ -66,6 +68,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         ListView forecastListView = (ListView) findViewById(R.id.listview_forecast);
         forecastListView.setAdapter(forecastAdapter);
 
+        final String locationSetting = Utility.getPreferredLocation(getBaseContext());
+        lastLocation = locationSetting;
+
         forecastListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView adapterView, View view, int position, long l) {
@@ -73,7 +78,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 // if it cannot seek to that position.
                 Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
                 if (cursor != null) {
-                    String locationSetting = Utility.getPreferredLocation(getBaseContext());
                     Intent intent = new Intent(getBaseContext(), DetailActivity.class);
                     intent.setData(WeatherContract.WeatherEntry.buildWeatherLocationWithDate(
                             locationSetting, cursor.getLong(COL_WEATHER_DATE)
@@ -87,7 +91,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     protected void onResume() {
         super.onResume();
+        String locationSetting = Utility.getPreferredLocation(getBaseContext());
+        if (!lastLocation.equals(locationSetting)) {
+            lastLocation = locationSetting;
+            onLocationChanged();
+        }
+    }
+
+    private void onLocationChanged() {
         fetchWeather();
+        // since we read the location when we create the loader, all we need to do is restart things
+        getSupportLoaderManager().restartLoader(FORECAST_LOADER_ID, null, this);
     }
 
     @Override
